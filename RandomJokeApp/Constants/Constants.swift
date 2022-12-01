@@ -9,7 +9,9 @@
 import Foundation
 
 struct Constants {
+    
     struct Urls {
         static let allJokes = URL(string: "https://official-joke-api.appspot.com/random_ten")
     }
+    
 }
