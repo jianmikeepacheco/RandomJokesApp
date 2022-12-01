@@ -10,24 +10,23 @@ import UIKit
 
 class JokesVC: UIViewController {
     
-    private var dataTask: URLSessionDataTask?
+    var dataTask: URLSessionDataTask?
     var jokeCell: JokeCell?
     
     // MARK: - the setup for the interface of the app: UILabel & UIButton
     
-    // UILabel - to show the joke
+    // UILabel - to show the setup
     private lazy var setupLabel: CustomLabel = {
-        let text = "" // default label
-        
+        let text = ""
         let label = CustomLabel(text: text)
         label.font = .systemFont(ofSize: 15, weight: .bold)
         
         return label
     }()
     
+    // UILabel - to show the punchline
     private lazy var setupPunchline: CustomLabel = {
-        let text = "" // default label
-        
+        let text = ""
         let label = CustomLabel(text: text)
         label.font = .systemFont(ofSize: 15, weight: .regular)
         
@@ -55,7 +54,7 @@ class JokesVC: UIViewController {
     }()
     
     // MARK: - Set the text
-    private var jokes: Jokes? {
+    var jokes: Jokes? {
         didSet {
             guard let jokes = jokes else { return }
             
@@ -68,6 +67,7 @@ class JokesVC: UIViewController {
     }
     
     // MARK: - Setup before loading the view
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = UIColor.white
@@ -88,6 +88,7 @@ class JokesVC: UIViewController {
     }
     
     // MARK: - Setup the constraints so UIKit knows how to layout above views
+    
     private func setConstraints() {
         setupLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20).isActive = true // constraint for leading position
         setupLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20).isActive = true // constraint for trailing position
@@ -104,42 +105,30 @@ class JokesVC: UIViewController {
         saveButton.leadingAnchor.constraint(equalTo: setupPunchline.leadingAnchor, constant: 40).isActive = true
     }
     
-    // MARK: - REFRESH BUTTON - load random joke into the main screen
-    @objc func loadJoke() {
-        
-        guard let url = Constants.Urls.allJokes else { return }
-        
-        dataTask?.cancel()
-        dataTask = URLSession.shared.dataTask(with: url) { data, response, error in
-            guard let data = data else { return }
-            if let decodedData = try? JSONDecoder().decode(Jokes.self, from: data) {
-                DispatchQueue.main.async {
-                    self.jokes = decodedData
-                }
-            }
-        }
-        dataTask?.resume()
-    }
-    
-    // MARK: - SAVE BUTTON - save random joke into the favorites screen
+}
+
+
+// MARK: - SAVE BUTTON - save random joke into the favorites screen
+
+extension JokesVC {
+
     @objc private func saveJoke() {
         let alert = UIAlertController(title: "Success",
                                       message: "Added to Favorites",
                                       preferredStyle: UIAlertController.Style.alert)
-        
+
         alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { _ in
-            
+
             let faveVC = FavoritesVC()
-            
+
             let setup = self.jokes?.first?.setup ?? ""
             let punchline = self.jokes?.first?.punchline ?? ""
-            
+
             faveVC.createItem(setup: setup, punchline: punchline)
-            
-            })
+
+        })
         )
         present(alert, animated: true)
     }
-    
-}
 
+}
