@@ -7,11 +7,15 @@
 
 import Foundation
 
-// JokesModel: must be decodable to decode the JSON file from the API
-struct Joke: Decodable {
-    let id: Int
-    let setup: String
-    let punchline: String
+struct Joke: Codable {
+    
+    var setup: String?
+    var punchline: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case setup = "setup"
+        case punchline = "punchline"
+    }
 }
 
 typealias Jokes = [Joke]

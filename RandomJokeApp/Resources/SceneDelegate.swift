@@ -19,12 +19,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        //UINavigationBar.appearance().tintColor = .systemRed
-        
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
         window?.rootViewController = createTabBar()
         window?.makeKeyAndVisible()
+        
     }
     
     func createJokesNC() -> UINavigationController {
@@ -39,7 +38,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func createFavoritesNC() -> UINavigationController {
         
         let favoritesNC = FavoritesVC()
-        favoritesNC.title = "Favorites List"
+        favoritesNC.title = "Favorites"
         favoritesNC.tabBarItem = UITabBarItem(tabBarSystemItem: .favorites, tag: 1)
         
         return UINavigationController(rootViewController: favoritesNC)
@@ -48,11 +47,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func createTabBar() -> UITabBarController {
         
         let tabBar = UITabBarController()
-        //UITabBar.appearance().tintColor = .systemRed
+        
+        UITabBar.appearance().backgroundColor = #colorLiteral(red: 0.7774446607, green: 0.7774446607, blue: 0.7774446607, alpha: 0.113892432)
+        UITabBar.appearance().tintColor = .systemRed
+        
         tabBar.viewControllers = [createJokesNC(), createFavoritesNC()]
         
         return tabBar
     }
+
+    
+    
     
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.

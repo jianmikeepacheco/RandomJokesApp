@@ -10,54 +10,73 @@ import UIKit
 
 class JokesVC: UIViewController {
     
-    // the setup for the interface of the app: UILabel & UIButton
+    private var dataTask: URLSessionDataTask?
+    var jokeCell: JokeCell?
+    
+    // MARK: - the setup for the interface of the app: UILabel & UIButton
+    
     // UILabel - to show the joke
-    private lazy var label: UILabel = {
-        let label  = UILabel(frame: .zero)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.numberOfLines = 0 // no limit to number of lines the label can hold
-        label.text = "Thinking of a joke..." // default label
-        label.sizeToFit()
+    private lazy var setupLabel: CustomLabel = {
+        let text = "" // default label
+        
+        let label = CustomLabel(text: text)
+        label.font = .systemFont(ofSize: 15, weight: .bold)
+        
         return label
     }()
     
-    // UIButton - to fetch the joke
-    private lazy var refreshButton: UIButton = {
-        let button = UIButton(frame: .zero)
+    private lazy var setupPunchline: CustomLabel = {
+        let text = "" // default label
+        
+        let label = CustomLabel(text: text)
+        label.font = .systemFont(ofSize: 15, weight: .regular)
+        
+        return label
+    }()
+    
+    // CusmtomButtonLoad - to load the joke
+    private lazy var refreshButton: CustomButton = {
         let image = UIImage(systemName: "arrow.clockwise")
+        let button = CustomButton(icon: image )
         button.setImage(image, for: .normal)
-        button.addTarget(self, action: #selector(loadData), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(loadJoke), for: .touchUpInside)
+        
         return button
     }()
     
-    // UIButton - to fetch the joke
-    private lazy var saveButton: UIButton = {
-        let button = UIButton(frame: .zero)
+    // CusmtomButtonSave - to save the joke
+    private lazy var saveButton: CustomButton = {
         let image = UIImage(systemName: "heart")
+        let button = CustomButton(icon: image )
         button.setImage(image, for: .normal)
-        button.addTarget(self, action: #selector(loadData), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(saveJoke), for: .touchUpInside)
+        
         return button
     }()
     
+    // MARK: - Set the text
     private var jokes: Jokes? {
         didSet {
             guard let jokes = jokes else { return }
-
-            label.text = "\(jokes.first?.setup ?? "")\n\n\(jokes.first?.punchline ?? "")"
-            label.sizeToFit()
+            
+            setupLabel.text = "\(jokes.first?.setup ?? "")"
+            setupLabel.sizeToFit()
+            
+            setupPunchline.text = "- \(jokes.first?.punchline ?? "")"
+            setupPunchline.sizeToFit()
         }
     }
-
+    
+    // MARK: - Setup before loading the view
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        
         self.view.backgroundColor = UIColor.white
         
-        // add the views to the screen
-        view.addSubview(label)
+        // add the labels to the screen
+        view.addSubview(setupLabel)
+        view.addSubview(setupPunchline)
+        
+        // add the buttons to the screen
         view.addSubview(refreshButton)
         view.addSubview(saveButton)
         
@@ -65,33 +84,30 @@ class JokesVC: UIViewController {
         setConstraints()
         
         // to load the data
-        loadData()
-        
-        // to save the joke as favorite
-        //saveJoke()
+        loadJoke()
     }
     
-    // setup the constraints so UIKit knows how to layout above views
+    // MARK: - Setup the constraints so UIKit knows how to layout above views
     private func setConstraints() {
-        label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 30).isActive = true // constant is the padding size
-        label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30).isActive = true
-        label.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true // constraint for the y-position
+        setupLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20).isActive = true // constraint for leading position
+        setupLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20).isActive = true // constraint for trailing position
+        setupLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true // constraint for the y-position
         
-        refreshButton.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 10).isActive = true // constraint for the refresh button
-        refreshButton.leadingAnchor.constraint(equalTo: label.leadingAnchor).isActive = true
+        setupPunchline.topAnchor.constraint(equalTo: setupLabel.bottomAnchor, constant: 20).isActive = true
+        setupPunchline.leadingAnchor.constraint(equalTo: setupLabel.leadingAnchor).isActive = true
+        setupPunchline.trailingAnchor.constraint(equalTo: setupLabel.trailingAnchor).isActive = true
         
-        saveButton.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 10).isActive = true // constraint for the save button
-        saveButton.leadingAnchor.constraint(equalTo: label.leadingAnchor, constant: 40).isActive = true
+        refreshButton.topAnchor.constraint(equalTo: setupPunchline.bottomAnchor, constant: 20).isActive = true
+        refreshButton.leadingAnchor.constraint(equalTo: setupPunchline.leadingAnchor).isActive = true
+        
+        saveButton.topAnchor.constraint(equalTo: setupPunchline.bottomAnchor, constant: 20).isActive = true
+        saveButton.leadingAnchor.constraint(equalTo: setupPunchline.leadingAnchor, constant: 40).isActive = true
     }
     
-    // to load the data into the view
-    private var dataTask: URLSessionDataTask?
-    
-    @objc func loadData() {
+    // MARK: - REFRESH BUTTON - load random joke into the main screen
+    @objc func loadJoke() {
         
-        guard let url = Constants.Urls.allJokes else {
-            return
-        }
+        guard let url = Constants.Urls.allJokes else { return }
         
         dataTask?.cancel()
         dataTask = URLSession.shared.dataTask(with: url) { data, response, error in
@@ -105,4 +121,25 @@ class JokesVC: UIViewController {
         dataTask?.resume()
     }
     
+    // MARK: - SAVE BUTTON - save random joke into the favorites screen
+    @objc private func saveJoke() {
+        let alert = UIAlertController(title: "Success",
+                                      message: "Added to Favorites",
+                                      preferredStyle: UIAlertController.Style.alert)
+        
+        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { _ in
+            
+            let faveVC = FavoritesVC()
+            
+            let setup = self.jokes?.first?.setup ?? ""
+            let punchline = self.jokes?.first?.punchline ?? ""
+            
+            faveVC.createItem(setup: setup, punchline: punchline)
+            
+            })
+        )
+        present(alert, animated: true)
+    }
+    
 }
+
