@@ -46,7 +46,7 @@ class JokesVC: UIViewController {
     // CusmtomButtonSave - to save the joke
     private lazy var saveButton: CustomButton = {
         let image = UIImage(systemName: "heart")
-        let button = CustomButton(icon: image )
+        let button = CustomButton(icon: image)
         button.setImage(image, for: .normal)
         button.addTarget(self, action: #selector(saveJoke), for: .touchUpInside)
         
@@ -54,6 +54,7 @@ class JokesVC: UIViewController {
     }()
     
     // MARK: - Set the text
+    
     var jokes: Jokes? {
         didSet {
             guard let jokes = jokes else { return }

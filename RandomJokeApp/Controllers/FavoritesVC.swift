@@ -35,7 +35,6 @@ class FavoritesVC: UIViewController {
     
     func configureTableView() {
         tableView.register(JokeCell.self, forCellReuseIdentifier: JokeCell.reuseIdentifier)
-        view.addSubview(tableView)
         
         tableView.delegate = self
         tableView.dataSource = self
